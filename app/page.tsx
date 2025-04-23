@@ -2,14 +2,14 @@
 
 import FormButton from "@/components/form-btn";
 import FormInput from "@/components/form-input";
-import { handleForm } from "./action";
+import { Login } from "./action";
 import { EnvelopeIcon } from "@heroicons/react/24/solid";
 import { UserIcon } from "@heroicons/react/24/solid";
 import { KeyIcon } from "@heroicons/react/24/solid";
 import { useActionState } from "react";
 
 export default function Home() {
-  const [state, action] = useActionState(handleForm, null);
+  const [state, action] = useActionState(Login, null);
 
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
@@ -23,34 +23,27 @@ export default function Home() {
           placeholder="Email"
           required
           icon={<EnvelopeIcon className="size-6 fill-gray-400" />}
+          errors={state?.fieldErrors.email}
         />
         <FormInput
           name="username"
           type="text"
           placeholder="Username"
           required
+          minLength={5}
           icon={<UserIcon className="size-6 fill-gray-400" />}
+          errors={state?.fieldErrors.username}
         />
         <FormInput
           name="password"
           type="password"
           placeholder="Password"
+          minLength={10}
           required
           icon={<KeyIcon className="size-6 fill-gray-400" />}
+          errors={state?.fieldErrors.password}
         />
-        {state?.errors && state.errors.length > 0 && (
-          <div className="text-red-500 font-medium">
-            {state.errors.map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}
-          </div>
-        )}
         <FormButton text="Log in" />
-        {state?.success && (
-          <p className="text-green-500 font-medium p-4 bg-green-300 rounded-2xl">
-            {state.success}
-          </p>
-        )}
       </form>
     </div>
   );

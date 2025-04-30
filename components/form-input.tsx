@@ -3,7 +3,7 @@ import React, { InputHTMLAttributes } from "react";
 interface InputProps {
   name: string;
   errors?: string[];
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 export default function Input({

@@ -3,6 +3,9 @@ import getSession from "@/lib/session";
 import { notFound, redirect } from "next/navigation";
 import { Prisma } from "./generated/prisma";
 import TweetList from "@/components/tweet-list";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
+import AddTweet from "@/components/add-tweet";
 
 async function getUser() {
   const session = await getSession();
@@ -40,7 +43,7 @@ export default async function Tweets() {
   return (
     <div className="p-10">
       <h1 className="text-black text-4xl text-center">tweets!</h1>
-
+      <AddTweet />
       <div className="mt-6">
         <TweetList initialTweets={initialtweets} />
       </div>

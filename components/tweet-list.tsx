@@ -11,7 +11,7 @@ interface TweetListProps {
 
 export default function TweetList({
   initialTweets,
-  tweetsPerPage = 1,
+  tweetsPerPage = 5,
 }: TweetListProps) {
   const [allTweets, setAllTweets] = useState<InitialTweets>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,18 +23,15 @@ export default function TweetList({
   useEffect(() => {
     if (initialTweets.length > 0) {
       setAllTweets(initialTweets);
-      const initialTotalPages = Math.max(
-        Math.ceil(initialTweets.length / tweetsPerPage),
-        2
-      );
+      const initialTotalPages = Math.ceil(initialTweets.length / tweetsPerPage);
       setTotalPages(initialTotalPages);
     }
   }, [initialTweets, tweetsPerPage]);
 
-  const currentTweet =
-    allTweets.length > 0
-      ? [allTweets[(currentPage - 1) % allTweets.length]]
-      : [];
+  const currentTweets = allTweets.slice(
+    (currentPage - 1) * tweetsPerPage,
+    currentPage * tweetsPerPage
+  );
 
   const fetchPageData = async (pageNumber: number) => {
     if (fetchedPages.includes(pageNumber)) {
@@ -52,10 +49,13 @@ export default function TweetList({
         );
 
         if (uniqueNewTweets.length > 0) {
-          setAllTweets((prev) => [...prev, ...uniqueNewTweets]);
-          setFetchedPages((prev) => [...prev, pageNumber]);
+          setAllTweets((prev) => {
+            const updatedTweets = [...prev, ...uniqueNewTweets];
+            setTotalPages(Math.ceil(updatedTweets.length / tweetsPerPage));
+            return updatedTweets;
+          });
 
-          setTotalPages((prev) => prev + uniqueNewTweets.length);
+          setFetchedPages((prev) => [...prev, pageNumber]);
           return true;
         }
       }
@@ -77,41 +77,94 @@ export default function TweetList({
       return;
     }
 
-    setCurrentPage(pageNumber);
-
-    if (pageNumber > allTweets.length && hasMoreData) {
-      await fetchPageData(pageNumber - 1);
+    const requiredTweets = pageNumber * tweetsPerPage;
+    if (requiredTweets > allTweets.length && hasMoreData) {
+      await fetchPageData(Math.floor(allTweets.length / tweetsPerPage));
     }
+
+    setCurrentPage(pageNumber);
   };
+
+  useEffect(() => {
+    const checkAndLoadMoreTweets = async () => {
+      const requiredTweets = currentPage * tweetsPerPage;
+      if (requiredTweets > allTweets.length && hasMoreData && !isLoading) {
+        await fetchPageData(Math.floor(allTweets.length / tweetsPerPage));
+      }
+    };
+
+    checkAndLoadMoreTweets();
+  }, [currentPage, allTweets.length, tweetsPerPage, hasMoreData, isLoading]);
 
   const goToPreviousPage = () => {
     if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
+      setCurrentPage(currentPage - 1);
     }
   };
 
   const goToNextPage = async () => {
-    if (currentPage >= allTweets.length && hasMoreData) {
-      const hasNewData = await fetchPageData(currentPage);
-      if (hasNewData) {
-        handlePageChange(currentPage + 1);
+    const nextPage = currentPage + 1;
+    const requiredTweetsForNextPage = nextPage * tweetsPerPage;
+
+    if (
+      requiredTweetsForNextPage > allTweets.length &&
+      hasMoreData &&
+      !isLoading
+    ) {
+      const newTweets = await getMoreTweets(
+        Math.floor(allTweets.length / tweetsPerPage)
+      );
+
+      if (newTweets && newTweets.length > 0) {
+        const existingIds = new Set(allTweets.map((tweet) => tweet.id));
+        const uniqueNewTweets = newTweets.filter(
+          (tweet) => !existingIds.has(tweet.id)
+        );
+
+        if (uniqueNewTweets.length > 0) {
+          setAllTweets((prev) => {
+            const updatedTweets = [...prev, ...uniqueNewTweets];
+            setTotalPages(Math.ceil(updatedTweets.length / tweetsPerPage));
+            return updatedTweets;
+          });
+          setFetchedPages((prev) => [
+            ...prev,
+            Math.floor(allTweets.length / tweetsPerPage),
+          ]);
+          setCurrentPage(nextPage);
+          if (
+            allTweets.length + uniqueNewTweets.length <
+            requiredTweetsForNextPage
+          ) {
+            setHasMoreData(false);
+          }
+        } else {
+          setHasMoreData(false);
+          if (currentPage < totalPages) {
+            setCurrentPage(nextPage);
+          }
+        }
+      } else {
+        setHasMoreData(false);
+        if (currentPage < totalPages) {
+          setCurrentPage(nextPage);
+        }
       }
     } else if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
+      setCurrentPage(nextPage);
     }
   };
 
   const isNextButtonDisabled = () => {
     if (isLoading) return true;
-
     if (hasMoreData) return false;
     return currentPage >= totalPages;
   };
 
   return (
     <div className="p-5 flex flex-col gap-5">
-      {currentTweet.length > 0 ? (
-        currentTweet.map((tweet) => <ListTweet key={tweet.id} {...tweet} />)
+      {currentTweets.length > 0 ? (
+        currentTweets.map((tweet) => <ListTweet key={tweet.id} {...tweet} />)
       ) : (
         <div className="text-center py-4">
           <span className="text-gray-500">표시할 트윗이 없습니다</span>
@@ -139,7 +192,7 @@ export default function TweetList({
 
         <div className="flex items-center mx-2">
           <span className="text-sm font-medium">
-            {currentPage} / {hasMoreData ? `${totalPages}+` : totalPages}
+            {currentPage} / {totalPages}
           </span>
         </div>
 

@@ -26,8 +26,8 @@ model Tweet {
   tweet      String
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt
-  userId   Int
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
   likes Like[]
 }
 

@@ -133,8 +133,17 @@ exports.Prisma.TweetScalarFieldEnum = {
 };
 
 exports.Prisma.LikeScalarFieldEnum = {
-  id: 'id',
   created_at: 'created_at',
+  updated_at: 'updated_at',
+  userId: 'userId',
+  tweetId: 'tweetId'
+};
+
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
   userId: 'userId',
   tweetId: 'tweetId'
 };
@@ -153,7 +162,8 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   User: 'User',
   Tweet: 'Tweet',
-  Like: 'Like'
+  Like: 'Like',
+  Comment: 'Comment'
 };
 
 /**

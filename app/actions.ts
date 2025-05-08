@@ -3,7 +3,135 @@
 import db from "@/lib/db";
 import { z } from "zod";
 import getSession from "@/lib/session";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email?: string | null;
+  bio: string | null;
+  created_at: Date;
+  _count: {
+    tweets: number;
+  };
+}
+
+export type InitialTweets = {
+  id: number;
+  tweet: string;
+  created_at: Date;
+  updated_at: Date;
+  userId: number;
+  user?: {
+    id: number;
+    username: string;
+    bio: string | null;
+  };
+}[];
+
+export interface TweetWithUser {
+  id: number;
+  tweet: string;
+  created_at: Date;
+  updated_at: Date;
+  userId: number;
+  user: {
+    id: number;
+    username: string;
+    bio: string | null;
+  };
+}
+
+// Get user profile with tweet count - now using username
+export async function getUserProfile(
+  username: string
+): Promise<UserProfile | null> {
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        bio: true,
+        created_at: true,
+        _count: {
+          select: {
+            tweets: true,
+          },
+        },
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
+  }
+}
+
+// Get tweets by username with pagination
+export async function getUserTweets(
+  username: string,
+  page = 0,
+  limit = 5
+): Promise<InitialTweets> {
+  try {
+    // First get the user ID from the username
+    const user = await db.user.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      return [];
+    }
+
+    const tweets = await db.tweet.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            bio: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      skip: page * limit,
+      take: limit,
+    });
+
+    return tweets as InitialTweets;
+  } catch (error) {
+    console.error("Error fetching user tweets:", error);
+    return [];
+  }
+}
+
+// Get more tweets for infinite scrolling or pagination - now using username
+export async function getMoreUserTweets(
+  username: string,
+  page: number
+): Promise<InitialTweets> {
+  try {
+    return await getUserTweets(username, page);
+  } catch (error) {
+    console.error("Error fetching more user tweets:", error);
+    return [];
+  }
+}
 
 export async function getMoreTweets(page: number) {
   const tweetsPerPage = 1;
@@ -63,6 +191,8 @@ export async function uploadProduct(_: any, formData: FormData) {
           id: true,
         },
       });
+
+      revalidatePath("/");
     }
   }
 }

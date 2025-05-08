@@ -4,6 +4,7 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 
 interface SessionContent {
   id?: number;
+  username?: string;
 }
 
 export default async function getSession() {

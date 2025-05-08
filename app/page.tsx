@@ -25,6 +25,9 @@ async function getUser() {
 
 async function getInitialTweets() {
   const tweets = await db.tweet.findMany({
+    orderBy: {
+      created_at: "desc",
+    },
     select: {
       tweet: true,
       created_at: true,

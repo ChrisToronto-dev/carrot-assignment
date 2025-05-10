@@ -162,7 +162,7 @@ export default function TweetList({
   };
 
   return (
-    <div className="p-5 flex flex-col gap-5">
+    <div className="flex flex-col">
       {currentTweets.length > 0 ? (
         currentTweets.map((tweet) => <ListTweet key={tweet.id} {...tweet} />)
       ) : (

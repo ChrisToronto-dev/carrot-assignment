@@ -7,6 +7,7 @@ import { EnvelopeIcon } from "@heroicons/react/24/solid";
 import { UserIcon } from "@heroicons/react/24/solid";
 import { KeyIcon } from "@heroicons/react/24/solid";
 import { useActionState } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const [state, action] = useActionState(Login, null);
@@ -45,6 +46,12 @@ export default function Home() {
         />
         <FormButton text="Log in" />
       </form>
+      <div className="flex justify-center items-center">
+        <p className="mr-4">아이디가 없으신가요? </p>
+        <Link href="/create-user">
+          <p className="text-lg">회원가입</p>
+        </Link>
+      </div>
     </div>
   );
 }

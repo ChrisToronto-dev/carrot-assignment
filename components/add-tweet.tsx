@@ -9,11 +9,11 @@ export default function AddTweet() {
   const [state, action] = useActionState(uploadProduct, null);
   return (
     <div>
-      <form action={action} className="p-5 flex flex-col gap-5">
+      <form action={action} className="flex flex-col gap-5">
         <Input
           name="tweet"
           required
-          placeholder="제목"
+          placeholder="생각을 공유해보세요."
           type="text"
           errors={state?.fieldErrors.tweet}
         />

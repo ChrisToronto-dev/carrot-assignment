@@ -22,7 +22,7 @@ export default function CreateAccount() {
           type="text"
           placeholder="Username"
           required
-          icon={<EnvelopeIcon className="size-6 fill-gray-400" />}
+          icon={<UserIcon className="size-6 fill-gray-400" />}
           errors={state?.fieldErrors.username}
         />
         <FormInput
@@ -30,7 +30,7 @@ export default function CreateAccount() {
           type="email"
           placeholder="Email"
           required
-          icon={<UserIcon className="size-6 fill-gray-400" />}
+          icon={<EnvelopeIcon className="size-6 fill-gray-400" />}
           errors={state?.fieldErrors.email}
         />
         <FormInput
@@ -38,7 +38,7 @@ export default function CreateAccount() {
           type="password"
           placeholder="Password"
           required
-          icon={<UserIcon className="size-6 fill-gray-400" />}
+          icon={<KeyIcon className="size-6 fill-gray-400" />}
           errors={state?.fieldErrors.password}
         />
         <FormInput
@@ -46,7 +46,7 @@ export default function CreateAccount() {
           type="password"
           placeholder="Confirm Password"
           required
-          icon={<UserIcon className="size-6 fill-gray-400" />}
+          icon={<KeyIcon className="size-6 fill-gray-400" />}
           errors={state?.fieldErrors.confirm_password}
         />
         <FormButton text="Create account" />

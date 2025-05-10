@@ -1,7 +1,7 @@
 import db from "@/lib/db";
 import getSession from "@/lib/session";
 import { notFound, redirect } from "next/navigation";
-import { Prisma } from "./generated/prisma";
+import { Prisma } from "./generated/prisma-client";
 import TweetList from "@/components/tweet-list";
 import AddTweet from "@/components/add-tweet";
 
@@ -43,11 +43,10 @@ export default async function Tweets() {
   const initialtweets = await getInitialTweets();
   console.log(initialtweets);
   return (
-    <div className="p-10">
-      <h1 className="text-black text-4xl text-center">tweets!</h1>
-      <h2 className="text-black text-2xl">{user.username}님 안녕하세요?</h2>
+    <div className="">
       <AddTweet />
       <div className="mt-6">
+        <h1 className="font-bold mb-3 text-2xl">모두의 이야기</h1>
         <TweetList initialTweets={initialtweets} />
       </div>
     </div>

@@ -159,7 +159,7 @@ export default async function TweetDetail(props: any) {
       {/* 기존 JSX 코드 */}
       <div className="p-5 flex items-center gap-3 border-b border-neutral-700">
         <div>
-          <h3 className="font-bold">{tweet.user.username}</h3>
+          <h3 className="font-bold">{tweet.user.username}님이 쓴 포스트</h3>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ export default async function TweetDetail(props: any) {
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="">
         {sessionId && username ? (
           <CommentForm
             tweetId={id}

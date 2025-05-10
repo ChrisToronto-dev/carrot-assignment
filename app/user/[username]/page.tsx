@@ -2,14 +2,11 @@ import { getUserProfile, getUserTweets } from "@/app/actions";
 import UserTweetList from "@/components/user-tweet-list";
 import { notFound } from "next/navigation";
 
-interface ProfilePageProps {
-  params: {
-    username: string;
-  };
-}
-
-export default async function ProfilePage({ params }: ProfilePageProps) {
-  const username = params.username;
+// any 타입 사용
+export default async function ProfilePage(props: any) {
+  const { params } = props;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const username = resolvedParams.username;
 
   // Fetch user profile and their tweets
   const [userProfile, userTweets] = await Promise.all([

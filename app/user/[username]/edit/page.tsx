@@ -11,10 +11,10 @@ interface ProfileEditPageProps {
   };
 }
 
-export default async function ProfileEditPage({
-  params,
-}: ProfileEditPageProps) {
-  const username = params.username;
+export default async function ProfileEditPage(props: any) {
+  const { params } = props;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const username = resolvedParams.username;
 
   // Fetch user profile data
   const userProfile = await getUserProfile(username);
@@ -24,8 +24,10 @@ export default async function ProfileEditPage({
   }
 
   // Verify if the current user is authorized to edit this profile
-  const cookiesInstance = cookies();
-  const session = await getSessionWithCookies(cookiesInstance);
+  const cookiesStore = cookies();
+  const awaitedCookies =
+    cookiesStore instanceof Promise ? await cookiesStore : cookiesStore;
+  const session = await getSessionWithCookies(awaitedCookies);
 
   if (!session || session.id !== userProfile.id) {
     redirect(`/user/${username}`); // Redirect to profile page if not authorized

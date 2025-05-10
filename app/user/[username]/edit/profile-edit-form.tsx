@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormInput from "@/components/form-input";
 import FormBtn from "@/components/form-btn";
-import { UserProfile, validateProfileForm, updateProfile } from "./actions";
+import { validateProfileForm, updateProfile } from "./actions";
 import { ProfileFormData, ValidationErrors } from "./schema";
+import { UserProfile } from "@/app/actions";
 
 interface ProfileEditFormProps {
   user: UserProfile;
@@ -251,7 +252,7 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
       </div>
 
       <div className="pt-6">
-        <FormBtn text="프로필 업데이트" isLoading={isLoading} />
+        <FormBtn text="프로필 업데이트" />
       </div>
     </form>
   );

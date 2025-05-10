@@ -38,7 +38,7 @@ export async function getUserProfile(
   }
 }
 
-export async function updateProfile(formData: ProfileFormData, userId: string) {
+export async function updateProfile(formData: ProfileFormData, userId: number) {
   try {
     const response = await fetch("/api/update", {
       method: "POST",

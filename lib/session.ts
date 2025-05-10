@@ -19,9 +19,8 @@ export default async function getSession() {
   return session;
 }
 
-export async function getSessionWithCookies(
-  cookiesInstance: ReadonlyRequestCookies | Promise<ReadonlyRequestCookies>
-) {
+// any 타입 사용
+export async function getSessionWithCookies(cookiesInstance: any) {
   const resolvedCookies =
     cookiesInstance instanceof Promise
       ? await cookiesInstance

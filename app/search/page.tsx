@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import FormButton from "@/components/form-btn";
@@ -35,7 +35,8 @@ interface SearchResults {
   users: UserResult[];
 }
 
-export default function SearchPage() {
+// 검색 기능을 담당하는 컴포넌트
+function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get("q") || "";
@@ -239,5 +240,20 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto py-8 px-4">
+          검색 결과를 불러오는 중...
+        </div>
+      }
+    >
+      <SearchContent />
+    </Suspense>
   );
 }

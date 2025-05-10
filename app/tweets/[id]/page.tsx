@@ -115,13 +115,9 @@ async function getUsernameFromSession(sessionId?: number) {
 
   return user?.username || null;
 }
-
-// 메타데이터 함수 추가
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }> | { id: string };
-}): Promise<Metadata> {
+// 메타데이터 함수 수정
+export async function generateMetadata(props: any): Promise<Metadata> {
+  const { params } = props;
   const resolvedParams = params instanceof Promise ? await params : params;
   const id = Number(resolvedParams.id);
 
@@ -131,11 +127,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function TweetDetail({
-  params,
-}: {
-  params: Promise<{ id: string }> | { id: string };
-}) {
+// 페이지 컴포넌트 수정 - any 타입 사용
+export default async function TweetDetail(props: any) {
+  const { params } = props;
   const resolvedParams = params instanceof Promise ? await params : params;
   const id = Number(resolvedParams.id);
 
@@ -159,8 +153,10 @@ export default async function TweetDetail({
   const comments = await getCachedComments(id);
   const username = await getUsernameFromSession(sessionId);
 
+  // JSX 부분은 변경 없음
   return (
     <div className="max-w-2xl mx-auto">
+      {/* 기존 JSX 코드 */}
       <div className="p-5 flex items-center gap-3 border-b border-neutral-700">
         <div>
           <h3 className="font-bold">{tweet.user.username}</h3>

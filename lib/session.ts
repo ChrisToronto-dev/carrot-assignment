@@ -8,7 +8,11 @@ interface SessionContent {
 }
 
 export default async function getSession() {
-  const session = await getIronSession<SessionContent>(cookies(), {
+  const cookiesStore = cookies();
+  const awaitedCookies =
+    cookiesStore instanceof Promise ? await cookiesStore : cookiesStore;
+
+  const session = await getIronSession<SessionContent>(awaitedCookies, {
     cookieName: "delicious-tt",
     password: process.env.COOKIE_PASSWORD!,
   });
@@ -16,9 +20,14 @@ export default async function getSession() {
 }
 
 export async function getSessionWithCookies(
-  cookiesInstance: ReadonlyRequestCookies
+  cookiesInstance: ReadonlyRequestCookies | Promise<ReadonlyRequestCookies>
 ) {
-  const session = await getIronSession<SessionContent>(cookiesInstance, {
+  const resolvedCookies =
+    cookiesInstance instanceof Promise
+      ? await cookiesInstance
+      : cookiesInstance;
+
+  const session = await getIronSession<SessionContent>(resolvedCookies, {
     cookieName: "delicious-tt",
     password: process.env.COOKIE_PASSWORD!,
   });

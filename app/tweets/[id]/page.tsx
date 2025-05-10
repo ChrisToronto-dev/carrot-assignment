@@ -5,6 +5,7 @@ import LikeButton from "@/components/like-button";
 import CommentForm from "@/components/comment-form";
 import { cookies } from "next/headers";
 import { getSessionWithCookies } from "@/lib/session";
+import { Metadata } from "next";
 
 async function getIsOwner(userId: number, sessionId?: number) {
   if (sessionId) {
@@ -115,19 +116,37 @@ async function getUsernameFromSession(sessionId?: number) {
   return user?.username || null;
 }
 
-type TweetDetailProps = {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-};
+// 메타데이터 함수 추가
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}): Promise<Metadata> {
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const id = Number(resolvedParams.id);
 
-export default async function TweetDetail({ params }: TweetDetailProps) {
-  const id = Number(params.id);
+  return {
+    title: `Tweet ${id}`,
+    description: `Details for tweet ${id}`,
+  };
+}
+
+export default async function TweetDetail({
+  params,
+}: {
+  params: Promise<{ id: string }> | { id: string };
+}) {
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const id = Number(resolvedParams.id);
+
   if (isNaN(id)) {
     return notFound();
   }
 
-  const cookiesInstance = cookies();
-  const session = await getSessionWithCookies(cookiesInstance);
+  const cookiesStore = cookies();
+  const awaitedCookies =
+    cookiesStore instanceof Promise ? await cookiesStore : cookiesStore;
+  const session = await getSessionWithCookies(awaitedCookies);
   const sessionId = session.id;
 
   const tweet = await getCachedPost(id);

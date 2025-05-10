@@ -115,11 +115,12 @@ async function getUsernameFromSession(sessionId?: number) {
   return user?.username || null;
 }
 
-export default async function TweetDetail({
-  params,
-}: {
+type TweetDetailProps = {
   params: { id: string };
-}) {
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
+
+export default async function TweetDetail({ params }: TweetDetailProps) {
   const id = Number(params.id);
   if (isNaN(id)) {
     return notFound();

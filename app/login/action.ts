@@ -17,22 +17,6 @@ const formSchema = z.object({
     .regex(passwordRegex, "You must include at leat one number."),
 });
 
-// export async function Login(prevState: any, formData: FormData) {
-//   const data = {
-//     email: formData.get("email"),
-//     username: formData.get("username"),
-//     password: formData.get("password"),
-//   };
-
-//   const result = formSchema.safeParse(data);
-//   if (!result.success) {
-//     console.log("Zod Flattened Errors:", result.error.flatten());
-//     return result.error.flatten();
-//   } else {
-//     console.log(result.data);
-//   }
-// }
-
 export async function Login(prevState: any, formData: FormData) {
   const data = {
     email: formData.get("email"),
@@ -68,7 +52,8 @@ export async function Login(prevState: any, formData: FormData) {
       return {
         fieldErrors: {
           password: ["Wrong password."],
-          email: [],
+          email: ["wrong email"],
+          username: ["wrong username"],
         },
       };
     }

@@ -1,8 +1,11 @@
 "use client";
 
-import { UserProfile } from "@/app/actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import FormInput from "@/components/form-input";
+import FormBtn from "@/components/form-btn";
+import { UserProfile, validateProfileForm, updateProfile } from "./actions";
+import { ProfileFormData, ValidationErrors } from "./schema";
 
 interface ProfileEditFormProps {
   user: UserProfile;
@@ -13,9 +16,11 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
 
-  console.log(user);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     username: user.username,
     bio: user.bio || "",
     email: user.email || "",
@@ -29,67 +34,44 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // 필드가 변경될 때 해당 필드의 오류 메시지 초기화
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setValidationErrors({});
 
-    // 비밀번호 검증
-    if (
-      formData.newPassword &&
-      formData.newPassword !== formData.confirmPassword
-    ) {
-      setErrorMessage("새 비밀번호가 일치하지 않습니다");
-      return;
-    }
+    // 클라이언트 측 유효성 검사
+    const validationResult = validateProfileForm(formData, user);
 
-    // 변경된 필드가 있는지 확인
-    const hasProfileChanges =
-      formData.username !== user.username || formData.bio !== user.bio;
-    const hasPasswordChanges = formData.currentPassword && formData.newPassword;
-
-    if (!hasProfileChanges && !hasPasswordChanges) {
-      setErrorMessage("변경된 내용이 없습니다");
+    const result = await validationResult;
+    if (!result.success) {
+      setErrorMessage(result.error || "유효성 검사 실패");
+      if (result.validationErrors) {
+        setValidationErrors(result.validationErrors);
+      }
       return;
     }
 
     try {
       setIsLoading(true);
 
-      // API 경로 수정: /api/update로 변경
-      const response = await fetch("/api/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: user.id,
-          username: formData.username,
-          bio: formData.bio,
-          email: formData.email,
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        }),
-      });
+      // 서버 액션 호출
+      const result = await updateProfile(formData, user.id);
 
-      // 에러 디버깅을 위한 코드 추가
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-
-        // JSON 응답이 아닌 경우 텍스트로 처리
-        if (!contentType || !contentType.includes("application/json")) {
-          const textError = await response.text();
-          console.error("API 응답 오류 (텍스트):", textError);
-          throw new Error("서버 응답이 유효한 JSON이 아닙니다");
-        }
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "프로필 업데이트에 실패했습니다");
+      if (result.error) {
+        setErrorMessage(result.error);
+        return;
       }
 
       setSuccessMessage("프로필이 성공적으로 업데이트되었습니다");
@@ -97,7 +79,7 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
       // 성공적인 업데이트 후 페이지 새로고침 및 리디렉션
       setTimeout(() => {
         router.refresh();
-        router.push(`/user/${formData.username}`); // 새 사용자 이름으로 리디렉션
+        router.push(`/user/${formData.username}`);
       }, 1500);
     } catch (error: any) {
       console.error("프로필 업데이트 오류:", error);
@@ -107,6 +89,11 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 특정 필드에 대한 오류 메시지 가져오기
+  const getFieldErrors = (fieldName: string) => {
+    return validationErrors[fieldName] || [];
   };
 
   return (
@@ -130,15 +117,20 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
         >
           사용자 이름
         </label>
-        <input
+        <FormInput
           type="text"
           id="username"
           name="username"
           value={formData.username}
           onChange={handleChange}
           required
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          errors={getFieldErrors("username")}
         />
+        {getFieldErrors("username").map((error, index) => (
+          <p key={index} className="mt-1 text-sm text-red-600">
+            {error}
+          </p>
+        ))}
       </div>
 
       <div className="space-y-1">
@@ -148,15 +140,20 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
         >
           이메일
         </label>
-        <input
+        <FormInput
           type="email"
           id="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
           placeholder="이메일 변경 (선택사항)"
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          errors={getFieldErrors("email")}
         />
+        {getFieldErrors("email").map((error, index) => (
+          <p key={index} className="mt-1 text-sm text-red-600">
+            {error}
+          </p>
+        ))}
       </div>
 
       <div className="space-y-1">
@@ -172,8 +169,13 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
           value={formData.bio}
           onChange={handleChange}
           rows={4}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
         />
+        {getFieldErrors("bio").map((error, index) => (
+          <p key={index} className="mt-1 text-sm text-red-600">
+            {error}
+          </p>
+        ))}
       </div>
 
       <div className="border-t pt-6 mt-6">
@@ -187,14 +189,19 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
             >
               현재 비밀번호
             </label>
-            <input
+            <FormInput
               type="password"
               id="currentPassword"
               name="currentPassword"
               value={formData.currentPassword}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              errors={getFieldErrors("currentPassword")}
             />
+            {getFieldErrors("currentPassword").map((error, index) => (
+              <p key={index} className="mt-1 text-sm text-red-600">
+                {error}
+              </p>
+            ))}
           </div>
 
           <div className="space-y-1">
@@ -204,14 +211,19 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
             >
               새 비밀번호
             </label>
-            <input
+            <FormInput
               type="password"
               id="newPassword"
               name="newPassword"
               value={formData.newPassword}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              errors={getFieldErrors("newPassword")}
             />
+            {getFieldErrors("newPassword").map((error, index) => (
+              <p key={index} className="mt-1 text-sm text-red-600">
+                {error}
+              </p>
+            ))}
           </div>
 
           <div className="space-y-1">
@@ -221,32 +233,25 @@ export default function ProfileEditForm({ user }: ProfileEditFormProps) {
             >
               새 비밀번호 확인
             </label>
-            <input
+            <FormInput
               type="password"
               id="confirmPassword"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              errors={getFieldErrors("confirmPassword")}
             />
+            {getFieldErrors("confirmPassword").map((error, index) => (
+              <p key={index} className="mt-1 text-sm text-red-600">
+                {error}
+              </p>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="pt-6">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`w-full p-3 rounded-md bg-orange-500 text-white font-medium
-            ${
-              isLoading
-                ? "opacity-70 cursor-not-allowed"
-                : "hover:bg-orange-600 active:bg-orange-700"
-            }
-          `}
-        >
-          {isLoading ? "처리 중..." : "프로필 업데이트"}
-        </button>
+        <FormBtn text="프로필 업데이트" isLoading={isLoading} />
       </div>
     </form>
   );

@@ -7,7 +7,7 @@ import { getSessionWithCookies } from "@/lib/session";
 
 interface ProfileEditPageProps {
   params: {
-    username: string; // Changed from id to username
+    username: string;
   };
 }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/app/generated/prisma"; // 상대 경로는 실제 파일 위치에 따라 조정해야 할 수 있습니다
+import { PrismaClient } from "@/app/generated/prisma-client"; // 상대 경로는 실제 파일 위치에 따라 조정해야 할 수 있습니다
 
 const prisma = new PrismaClient();
 

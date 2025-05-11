@@ -4,6 +4,9 @@ import "./globals.css";
 import Link from "next/link";
 import getSession from "@/lib/session";
 import db from "@/lib/db";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { HomeIcon } from "@heroicons/react/24/solid";
+import { UserIcon } from "@heroicons/react/24/solid";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,16 +41,16 @@ export default async function RootLayout({
           <nav className="flex justify-between items-center">
             <div className="font-bold text-xl">
               <Link href="/" className="hover:text-blue-600 transition-colors">
-                MyApp
+                CarrotPost
               </Link>
             </div>
-            <ul className="flex space-x-6">
+            <ul className="flex items-center space-x-6">
               <li>
                 <Link
                   href="/"
                   className="hover:text-blue-600 transition-colors"
                 >
-                  홈
+                  <HomeIcon className="size-8" />
                 </Link>
               </li>
               {username ? (
@@ -56,12 +59,22 @@ export default async function RootLayout({
                     href={`/user/${username}`}
                     className="hover:text-blue-600 transition-colors"
                   >
-                    프로필
+                    <UserIcon className="size-8" />
                   </Link>
                 </li>
               ) : (
                 ""
               )}
+              <li>
+                <div className="search-bar">
+                  <Link
+                    href="/search"
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    <MagnifyingGlassIcon className="size-8" />
+                  </Link>
+                </div>
+              </li>
             </ul>
           </nav>
         </header>

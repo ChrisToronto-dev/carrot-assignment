@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     const cookiesInstance = cookies();
     const session = await getSessionWithCookies(cookiesInstance);
 
+    console.log(session);
     if (!session) {
       return NextResponse.json(
         { message: "인증되지 않은 사용자입니다" },
@@ -19,14 +20,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { id, username, bio, email, currentPassword, newPassword } = body;
-
+    console.log(session);
     // Check if the logged-in user is updating their own profile
-    if (session.id !== id) {
-      return NextResponse.json(
-        { message: "자신의 프로필만 수정할 수 있습니다" },
-        { status: 403 }
-      );
-    }
 
     // Find the user
     const user = await db.user.findUnique({

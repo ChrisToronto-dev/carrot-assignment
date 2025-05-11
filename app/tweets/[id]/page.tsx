@@ -168,12 +168,6 @@ export default async function TweetDetail(props: any) {
 
         <div className="flex justify-between items-center">
           <LikeButton isLiked={isLiked} likeCount={likeCount} tweetId={id} />
-
-          {isOwner ? (
-            <button className="bg-red-500 px-5 py-2.5 rounded-md text-white font-semibold">
-              Delete tweet
-            </button>
-          ) : null}
         </div>
       </div>
 

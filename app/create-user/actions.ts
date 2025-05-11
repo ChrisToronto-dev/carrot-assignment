@@ -83,9 +83,8 @@ export async function createAccount(prevState: any, formData: FormData) {
     confirm_password: formData.get("confirm_password"),
   };
 
+  const result = await formSchema.safeParseAsync(data);
   try {
-    const result = await formSchema.safeParseAsync(data);
-
     if (!result.success) {
       console.log(result.error.flatten());
       return result.error.flatten();
@@ -105,8 +104,6 @@ export async function createAccount(prevState: any, formData: FormData) {
       const session = await getSession();
       session.id = user.id;
       await session.save();
-
-      redirect(`/user/${result.data.username}`);
     }
   } catch (error) {
     console.error("Account creation error:", error);
@@ -115,4 +112,5 @@ export async function createAccount(prevState: any, formData: FormData) {
       fieldErrors: {},
     };
   }
+  redirect(`/user/${result.data.username}`);
 }

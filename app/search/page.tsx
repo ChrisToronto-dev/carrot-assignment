@@ -194,7 +194,7 @@ function SearchContent() {
             {results.users.map((user) => (
               <div key={user.id} className="border p-4 rounded-lg">
                 <Link
-                  href={`/profile/${user.id}`}
+                  href={`/user/${user.username}`}
                   className="text-xl font-semibold text-blue-600 hover:underline"
                 >
                   @{user.username}
@@ -218,7 +218,7 @@ function SearchContent() {
               <div key={tweet.id} className="border p-4 rounded-lg">
                 <div className="flex items-center mb-2">
                   <Link
-                    href={`/profile/${tweet.user.id}`}
+                    href={`/user/${tweet.user.username}`}
                     className="font-semibold text-blue-600 hover:underline"
                   >
                     @{tweet.user.username}

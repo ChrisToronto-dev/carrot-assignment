@@ -40,7 +40,16 @@ export async function getUserProfile(
 
 export async function updateProfile(formData: ProfileFormData, userId: number) {
   try {
-    const response = await fetch("/api/update", {
+    // 절대 URL로 변경
+    const baseUrl =
+      process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "";
+    if (!baseUrl) {
+      return {
+        error: "API URL이 설정되지 않았습니다. 환경 변수를 확인해주세요.",
+      };
+    }
+
+    const response = await fetch(`${baseUrl}/api/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
